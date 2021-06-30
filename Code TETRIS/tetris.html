@@ -1,0 +1,470 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<meta charset="utf-8">
+<html>
+
+<head>
+   <title>JS-DHTML-Tetris</title>
+   <meta name="Title" lang="fr" content="jeu de TETRIS">
+    <meta name="Keywords" lang="fr" content="javascript jeu tetris dhtml ghislain lavoie">
+   <meta name="Author" lang="fr" content="Ghislain Lavoie">
+
+ <link href="styles.css" rel="stylesheet" />
+
+ <div class="flex-container" >
+   <div class="flex-item1"></div>
+   <div class="flex-item1"></div>
+   <div class="flex-item1"></div>
+   <div class="flex-item1"></div>
+   <div class="flex-item1"></div>
+   <div class="flex-item1"></div>
+   <div id ="alarme" style="background-color:black;" >ALARME</div>
+</div>
+
+<script>
+
+// var cobayeA = ["6px","12px","9px","8px","13px","11px","7px","10px"];
+// var temps = [100,70,30,60,80,90,50,40]
+// var indice = 0; 
+// var police = cobayeA[indice];
+//document.getElementById("alarme").style.fontSize = cobayeA[indice];
+//var counter = temps[indice];
+
+
+var TaillePolice = "25.6px"; //TAILLE POLICE A CHANGER 
+var NbSec = 60; //NB SEC AVANT APPRITION ALARME A CHANGER 
+
+document.getElementById("alarme").style.fontSize = TaillePolice; 
+var counter = NbSec; 
+
+var intervalId = null;
+
+function finish() {
+  clearInterval(intervalId);
+  document.getElementById("alarme").style.color = '#f00';
+}
+function bip() {
+    counter--;
+    if(counter == 0) finish();
+    else {;
+    } 
+}
+function start(){
+  intervalId = setInterval(bip, 1000);
+}  
+function heureDebut(){
+   
+   return heureDeb = new Date();
+}
+
+
+document.onkeypress=function(e){e=e||window.event;
+    var key=e.which?e.which:event.keyCode;
+    if (key==32) {
+    var heureClic = new Date();
+
+    document.getElementById("deb").innerText="Minutes de départ : "+heureDeb.getMinutes()+" // Secondes de départ : " + heureDeb.getSeconds();
+    document.getElementById("fin").innerText="Minutes de fin : "+heureClic.getMinutes()+" // Secondes de fin : " + heureClic.getSeconds();
+    //document.getElementById("etape").innerText="Nombre de sec apparition alarme : " + temps[indice] +" // Taille de police : " + cobayeA[indice];
+    document.getElementById("etape").innerText="Nombre de sec apparition alarme : " + NbSec +" // Taille de police : " + TaillePolice;
+ 
+
+
+
+    document.getElementById("alarme").style.color = black;
+    indice = indice + 1 ;
+    counter = temps[indice];
+    document.getElementById("alarme").style.fontSize = cobayeA[indice];
+
+    nouvellePartie();
+    
+    }}
+
+</script>
+
+
+
+
+
+<STYLE type="text/css">
+  body {background-color:#d2d2d2;color:#000000;font-family:tahoma;}
+  input {background-color:#e6e6e6;width:120px;}
+  .caseTB {background-color:#8f8f8f;border:1px #f8cc8b inset;width:15px;height:15px;font-size:5px;}
+  .inpText {background-color:#9f9f9f;width:70px;border:0px;border-bottom:1px black solid;text-align:right;}
+  #aide {width:430px;height:400px;background-color:#d2d2d2;overflow:auto;font-family:arial;font-size:14px;position:absolute;display:none;}
+   p {margin:5px;}
+   p.para {text-align:justify;text-justify:auto;}
+   p.para:first-letter {font-weight:bold;}
+</STYLE>
+<script type="text/javascript">
+var  ok = null;
+var formCour = null;
+var formNext = null;
+var cases   = new Array();
+var formes = new Array();
+var niveau = 1;
+var point   = 0;
+var ligne = 0;
+var pause = false;
+var fin = true;
+// couleurs de diff�rentes formes du jeux
+var coulForme = new Array("#81e7f5","#0eb16c","#404fff","#fcd836","#c681f5","#7ffd29","#ff0000");
+// Tableaux qui donnes la position g�ographique de chaque cube (4 cubes) 
+//  qui compose une formes a partir de la coordonn� 0,0 (y,x) du coin inferieur gauche
+//  d'un tableau de 4X4 et ce pour chacune des rotations possibles 
+//  donc 4 cubes par formes *  4 rotations = 16 coordonn�es (y,x) par formes
+formes[0] = new Array(-1,0,-1,1,0,1,0,2,-2,1,-1,1,-1,0,0,0,-1,0,-1,1,0,1,0,2,-2,1,-1,1,-1,0,0,0);
+formes[1] = new Array(0,0,0,1,-1,1,-1,2,-2,0,-1,0,-1,1,0,1,0,0,0,1,-1,1,-1,2,-2,0,-1,0,-1,1,0,1);
+formes[2] = new Array(-1,1,-1,2,0,1,0,2,-1,1,-1,2,0,1,0,2,-1,1,-1,2,0,1,0,2,-1,1,-1,2,0,1,0,2);
+formes[3] = new Array(0,2,0,1,0,0,-1,0,0,1,-1,1,-2,1,-2,2,-1,0,-1,1,-1,2,0,2,-2,1,-1,1,0,1,0,0);
+formes[4] = new Array(0,0,0,1,0,2,-1,2,-2,1,-1,1,0,1,0,2,-1,2,-1,1,-1,0,0,0,0,1,-1,1,-2,1,-2,0);
+formes[5] = new Array(0,0,0,1,0,2,0,3,-3,1,-2,1,-1,1,0,1,0,0,0,1,0,2,0,3,-3,1,-2,1,-1,1,0,1);
+formes[6] = new Array(-1,0,-1,1,-1,2,0,1,-2,1,-1,1,0,1,-1,0,0,2,0,1,0,0,-1,1,0,0,-1,0,-2,0,-1,1);
+var tailleCase = 15;
+var nbCaseX  = 12;
+var nbCaseY  = 22;
+var taille = tailleCase + (document.all?0:-2);
+var rebord = (document.all)?0:2;
+var posx,posy; 
+var formCour, formSuiv;
+// objet cube (un simple DIV) qui fait partie d'un objet forme
+function cube(y,x,py,px,coul)
+{
+  this.el = document.createElement("div");
+  this.el.style.position = "absolute";
+  this.el.style.top = ((taille+rebord)*(y+py))+"px";
+  this.el.style.left = ((taille+rebord)*(x+px))+"px";
+  this.el.style.display = (y+py>=0)?"block":"none";
+  this.el.style.width = taille+"px";
+  this.el.style.height = taille+"px";
+  this.el.style.backgroundColor = coul;
+  this.el.style.border="1px black solid";
+  this.el.style.fontSize = "0px";
+}
+// objet forme (une des formes du jeu de 0-6) avec ses 4 objets cubes (4 DIVs)
+function forme(no,py,px,leDiv)
+{
+  var i,j;
+  this.cubes = new Array();
+  this.rotation = 0;
+  this.no = no;
+  for (i =0, j=0;i<8;i = i+2,j++)
+  {
+    this.cubes[j] = new cube(formes[no][i],formes[no][i+1],py,px,coulForme[no])
+   leDiv.appendChild(this.cubes[j].el);
+  }
+}
+// fonction qui g�re les d�placement d'une formes dans le jeu (gauche, droite, rotation), 
+// si la forme ne peut pas se d�placer, la fonction retourne un booleen faux
+function deplacerForme(nbY, nbX, plusRotation,py,px)
+{ 
+   var i,j,x,y,rotation;
+   rotation = (formCour.rotation + plusRotation);
+   rotation = rotation<0?3:rotation>3?0:rotation;
+   // v�rifier avant le d�placement si les cubes peuvent se d�placer dans des cases vides
+   for (i =rotation*8,j=0;i<(rotation*8)+8;i = i+2,j++)
+   { 
+     y = formes[formCour.no][i] + py + nbY;
+     x = formes[formCour.no][i+1] + px + nbX;
+     if (x==-1 || y==nbCaseY || x==nbCaseX || (cases[y] && cases[y][x]!=null)) return false;
+   }
+    formCour.rotation = rotation;
+    py = py + nbY;
+    px = px + nbX;
+   // faire le d�placement de cubes de la forme (droite, gauche ou rotation)
+   for (i =rotation*8,j=0;i<(rotation*8)+8;i = i+2,j++)
+  { 
+   y = (formes[formCour.no][i] + py);
+   formCour.cubes[j].el.style.display = (y>=0)?"block":"none";
+   formCour.cubes[j].el.style.top = ((taille+rebord) * y)+"px";
+    formCour.cubes[j].el.style.left = ((taille+rebord) * (formes[formCour.no][i+1] + px))+"px";
+  }
+  return true;
+}
+// initialisation du jeu, cr�ation du tableau du jeu, appel� une seul fois  
+function initialiserJeux()
+{
+   var tbl,tb,cols,rows,row,col;
+   bord = document.getElementById("jeux");
+   prochain = document.getElementById("next");
+   bord.style.width = tailleCase * nbCaseX;
+   bord.style.height = tailleCase * nbCaseY;  
+   bord.style.backgroundColor = "#8f8f8f"; 
+   tbl = document.createElement("table");
+   tb= document.createElement("tbody");
+   tbl.appendChild(tb);
+   tbl.cellSpacing="0";
+   tbl.cellPadding="0";
+   tbl.width = tailleCase * nbCaseX;
+   tbl.height = tailleCase * nbCaseY;
+   for (rows=0;rows<nbCaseY;rows++)
+   {
+     row = document.createElement("TR");
+    for (cols=0;cols<nbCaseX;cols++)
+    {
+       col = document.createElement("td");
+      col.className="caseTB";
+      col.innerHTML="&nbsp;";
+      row.appendChild(col);
+    }
+    tbl.lastChild.appendChild(row);
+   }
+   bord.appendChild(tbl);
+   document.key.down.focus();
+   document.key.down.onkeydown = verifierActionJoueur;
+}
+// d�buter une nouvelle partie, initialisation des variables, appel� a chaques d�but de partie.
+function nvPartie()
+{
+
+
+   var i;
+   initCases();
+   if (formCour && !fin)
+   {
+      for (i=0; i<4;i++)
+         bord.removeChild(formCour.cubes[i].el);
+   }
+   posx = ((nbCaseX / 2)-2);
+   posy = -1;
+   vitesse = 200;
+   niveau = 1;
+   point   = 0;
+   ligne = 0;
+   fin = false;
+   // cr�ation des deux obet forme.  La forme suivante et la forme courante
+   formNext =new forme( Math.floor(Math.random()*formes.length),1,0,prochain);
+   formCour =new forme( Math.floor(Math.random()*formes.length),posy,posx,bord);
+   pts = setInterval("majPointage()",1000);
+   
+   setTimeout("partieEnCour()",vitesse);
+}
+
+function nouvellePartie()
+{
+
+   start();
+   heureDebut();
+
+   var i;
+   initCases();
+   if (formCour && !fin)
+   {
+      for (i=0; i<4;i++)
+         bord.removeChild(formCour.cubes[i].el);
+   }
+   posx = ((nbCaseX / 2)-2);
+   posy = -1;
+   vitesse = 200;
+   niveau = 1;
+   point   = 0;
+   ligne = 0;
+   fin = false;
+   // cr�ation des deux obet forme.  La forme suivante et la forme courante
+   formNext =new forme( Math.floor(Math.random()*formes.length),1,0,prochain);
+   formCour =new forme( Math.floor(Math.random()*formes.length),posy,posx,bord);
+   pts = setInterval("majPointage()",1000);
+   setTimeout("partieEnCour()",vitesse);
+}
+// fonction qui boucle en interuption a une vitesse variable pour le d�placement vers le bas des formes du jeu.  
+//   elle d�termine si 'une forme ne peut plus se d�placer vers le bas.
+//   elle d�termine si une ligne a �t� complet� et la d�truit si c'est le cas
+//   elle �value la fin de la partie lorqu'une forme ne peu plus �tre ajouter dans le tableau.
+function partieEnCour()
+{ 
+    var x,y,i,cols;
+   if (!deplacerForme(1,0,0,posy,posx))
+    {
+      point = point + niveau;
+      var Y = new Array();
+       for (i =formCour.rotation*8,j=0;i<(formCour.rotation*8)+8;i = i+2,j++)
+       { 
+        prochain.removeChild(formNext.cubes[j].el);
+        y = formes[formCour.no][i] + posy;
+        Y[Y.length] = y;
+         x = formes[formCour.no][i+1] + posx;
+        if (y>=0) 
+        {
+          cases[y][x] = formCour.cubes[j].el;
+        } 
+       }
+      Y.sort();
+      for (i=0;i<Y.length;i++)
+      {
+            if (i==0 || ( i>0 && Y[i]!=Y[i-1]))
+         {
+            for (cols=0;cols<nbCaseX;cols++)
+               if (cases[Y[i]] && cases[Y[i]][cols]==null) break;
+            if (cols==nbCaseX) enleverLignePleine(Y[i]);
+         }
+      }
+       if (posy==-1) 
+      {
+         fin = true;
+         clearTimeout(ok);
+        clearInterval(pts);
+        majPointage();
+        document.main.start.value = "COMMENCER";
+        //coucou
+        nvPartie()
+        return;
+      }
+      posx = ((nbCaseX / 2)-2);
+       posy = -1;
+       formCour = new forme(formNext.no,posy,posx,bord);
+      formNext = new forme( Math.floor(Math.random()*formes.length),1,0,prochain);
+    }
+   else
+   {
+      posy++;
+    }
+    ok = setTimeout("partieEnCour()",vitesse);
+}
+// fonction qui enl�ves les lignes pleines.  chacun des cubes (DIV) de la ligne Y sont retir�s et les cubes au dessus decendes d'une rang�e
+function enleverLignePleine(y)
+{ 
+   ligne++;
+   point = point + 100;
+   niveau = Math.floor(ligne/5)+1;
+   vitesse = 200;
+   var rows,cols;
+   for (rows=y;rows>=0;rows--)
+    for (cols=0;cols<nbCaseX;cols++)
+    {
+         if (rows!=y)
+       {
+          if (cases[rows][cols]!=null)
+            cases[rows][cols].style.top = (cases[rows][cols].offsetTop + taille + rebord)+"px";
+          cases[rows+1][cols] = cases[rows][cols];
+         cases[rows][cols]= null;
+       }
+       else
+          bord.removeChild(cases[rows][cols]);
+    } 
+}
+// vide le tableau cases qui contient les cubes (objet DIV) qui se sont fix� au tableau du jeux lorsqu'un forme ne bouge plus. 
+function initCases()
+{
+   var rows,cols;
+   for (rows=0;rows<nbCaseY;rows++)
+   {
+      if (!cases[rows]) cases[rows] = new Array();
+    for (cols=0;cols<nbCaseX;cols++)
+    {
+         if (cases[rows][cols])
+           bord.removeChild(cases[rows][cols]);
+       cases[rows][cols] = null;
+    } 
+   }
+}
+// v�rification des touches fl�che et espace et effectus le d�placement correspondant
+function verifierActionJoueur(ev)
+{
+    if (pause) return;
+   var keyPress = document.all?event.keyCode:ev.which;
+   if (keyPress == 37) 
+      if (deplacerForme(0,-1,0,posy,posx)) posx--; 
+    if (keyPress == 39) 
+      if(deplacerForme(0,1,0,posy,posx)) posx++;
+   if (keyPress == 38) deplacerForme(0,0,-1,posy,posx)
+   if (keyPress == 40) deplacerForme(0,0,1,posy,posx)
+    if (keyPress == 32) {while(deplacerForme(1,0,0,posy,posx)){posy++;point = point + niveau;}}
+}
+
+function majPointage()
+{
+   document.main.points.value = point;
+   document.main.niveaux.value = niveau;
+   document.main.lignes.value = ligne;
+}
+
+function topElement(e)
+{ 
+   return  ((e && topElement != topElement.caller)?e.offsetTop:0) + ((e && e.offsetParent)?e.offsetParent.offsetTop + topElement(e.offsetParent):0);
+}
+
+function leftElement(e)
+{
+   return ((e && leftElement != leftElement.caller)?e.offsetLeft:0) + ((e && e.offsetParent)?e.offsetParent.offsetLeft + leftElement(e.offsetParent):0);
+}
+
+</script>
+</head>
+
+<div class="flex-container">
+   <div class="flex-item1"> <img name="gif" src="matrix0.gif" width="350" height="200" /> </div>
+   <div class="flex-item1">
+
+
+
+
+<body onload="initialiserJeux();" onclick="document.key.down.focus();" >
+<table  border="0" >
+<tr ><td align="center" valign="middle">
+<table id="posJeux" style="border:6px #8f8f8f groove;" width="430" height="400" border="0" cellpadding="0" cellspacing="0" bgcolor="#e6e6e6">
+<tr>
+<td width="55%" align="center">
+<div style="position:relative;">
+<div style="position:relative;" id="jeux"></div></div></td>
+<td width="45%" align="center" bgcolor="#9f9f9f"><span style="font-size:22px;font-weight:bold;">TETRIS</span></br></br>
+    <table border="0" height="30px" bgcolor="#8f8f8f">
+               <tr><td height="30px;" align="center">
+            <div>
+            <div id="next"  style="position:relative;">
+              <table cellpadding="0" cellspacing="0" bgcolor="#8f8f8f" width="60px" height="30px">
+              <tr><td class="caseTB">&nbsp;</td><td class="caseTB">&nbsp;</td><td class="caseTB">&nbsp;</td><td class="caseTB">&nbsp;</td></tr>
+              <tr><td class="caseTB">&nbsp;</td><td class="caseTB">&nbsp;</td><td class="caseTB">&nbsp;</td><td class="caseTB">&nbsp;</td></tr>
+              </table>
+            </div></div></td></tr>
+   </table>
+   <br><br>
+   <form name="main">
+   &nbsp;
+   <!----<input type="button" value="Prêt.e" onclick="start();heureDebut();"><br><br>---->
+   <br><br>
+   <!-- <input type="button" name="start" value="COMMENCER" onclick="clearTimeout(ok);if (pause) {pause=false;partieEnCour();this.value='PAUSE';} else {if (this.value=='COMMENCER') {nouvellePartie();this.value='PAUSE'} else {this.value='CONTINUER';pause = true;}}">  --->
+   <input type="button" name="start" value="COMMENCER" onclick="nouvellePartie();">
+   <table>
+   <tr><td>Pointage</td><td>:&nbsp;<input class="inpText" name="points" type="text" value="0" size="6"></td></tr>
+   <tr><td>Niveau</td><td>:&nbsp;<input class="inpText" name="niveaux" type="text" value="0" size="6"></td></tr>
+   <tr><td>Lignes</td><td>:&nbsp;<input class="inpText" name="lignes" type="text" value="0" size="6"></td></tr>
+   </table>
+   </form>     
+</td>
+</tr>
+</table>
+</td></tr>
+</table>
+</div>
+   <div class="flex-item1"><img name="gif" src="1.gif" width="350" height="200" /></div>
+</div>
+
+<div style="position:absolute;top:-100px;left:0px;">
+<form name="key" onsubmit="return false;"><input name="down" type="texte" value=""></form>
+</div>
+</div>
+
+<div class="flex-container">
+   <div class="flex-item1"> <img name="gif" src="2.gif" width="350" height="200" /> </div>
+   <div class="flex-item1"> <img name="gif" src="3.gif" width="350" height="200" /> </div>
+   <div class="flex-item1"> <img name="gif" src="4.gif" width="350" height="200" /> </div>
+</div>
+
+
+</body>
+
+
+<div id ="etape">
+</div>
+
+<div id ="deb">
+</div>
+
+<div id ="fin">
+</div>
+
+
+</html>
+
+
+
+</html>
